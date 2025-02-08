@@ -1,24 +1,22 @@
-import { FirestoreCollectionNameType, FirestoreCollectionsType } from "@/types";
+import { useEffect, useState } from "react";
+import { firestore } from "@/services/firebase/config";
 import {
   query,
   onSnapshot,
   collection,
   QueryConstraint,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
 import { convertTimestampsToDate, removeDuplicates } from "@/utils/functions";
-import { firestore } from "@/services/firebase/config";
 
 type Props<T> = {
-  Collection: FirestoreCollectionNameType;
+  Collection: string;
   Condition?: QueryConstraint[];
   Dependencies?: Array<any>;
   Run?: boolean;
   ReplaceOld?: boolean;
 };
-function useCollectionObserver<
-  T extends FirestoreCollectionsType[FirestoreCollectionNameType][number]
->({
+
+function useCollectionObserver<T>({
   Collection,
   Condition,
   Dependencies = [],
@@ -28,13 +26,16 @@ function useCollectionObserver<
   const [firestoreCollection, setFirestoreCollection] = useState<
     Array<T & { docId: string }>
   >([]);
+
   useEffect(() => {
     if (Run === false)
       return setFirestoreCollection((prev) => (ReplaceOld ? [] : prev));
+
     console.info("Rerendering useCollectionObserver...");
     const q = Condition
       ? query(collection(firestore, Collection), ...Condition)
       : query(collection(firestore, Collection));
+
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const data: Array<T & { docId: string }> = [];
       querySnapshot.forEach((doc) => {
@@ -44,17 +45,19 @@ function useCollectionObserver<
           }
         );
       });
+
       setFirestoreCollection((prev) =>
         ReplaceOld ? data : removeDuplicates([...prev, ...data], "docId")
       );
     });
 
+    // Properly list dependencies
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
-  }, [...Dependencies, Run]);
+  }, [Collection, Condition, Dependencies, Run, ReplaceOld]); // Add the necessary dependencies
 
   return firestoreCollection;
 }

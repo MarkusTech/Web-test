@@ -11,17 +11,27 @@ import { sanitizeString } from "@/utils/functions";
 import { TSDate } from "@/utils/variables";
 import { useCallback, useEffect, useState } from "react";
 import MessageRow from "./components/MessageRow";
-import { orderBy } from "firebase/firestore";
+import { orderBy, limit, startAfter } from "firebase/firestore";
 
 const Pagination = () => {
   const { Auth, logout } = useAuth();
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState(false);
+  const [lastVisible, setLastVisible] = useState<
+    (MessageType & { docId: string }) | null
+  >(null);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const Messages = useCollectionObserver<MessageType>({
     Collection: "messages",
-    Condition: [orderBy("createdAt", "desc")],
+    Condition: [
+      orderBy("createdAt", "desc"),
+      ...(lastVisible ? [startAfter(lastVisible.createdAt)] : []), // Only add startAfter if lastVisible is not null
+      limit(20), // Limit to 20 messages per query
+    ],
   });
+
   const sendMessage = useCallback(async () => {
     if (!Auth) return;
     const sanitized = sanitizeString(message);
@@ -54,6 +64,30 @@ const Pagination = () => {
     dependencies: [handleSend, Auth],
   });
 
+  const handleScroll = (e: React.SyntheticEvent<HTMLDivElement>) => {
+    const scrollTop = e.currentTarget.scrollTop;
+    const scrollHeight = e.currentTarget.scrollHeight;
+    const clientHeight = e.currentTarget.clientHeight;
+
+    // If the user scrolls to the top, start loading the next set of messages
+    if (scrollTop === 0 && !loading && hasMore) {
+      setLoading(true);
+      if (Messages.length > 0) {
+        const nextLastVisible = Messages[Messages.length - 1];
+        setLastVisible(nextLastVisible);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (Messages.length > 0) {
+      setLoading(false);
+      if (Messages.length < 20) {
+        setHasMore(false); // No more messages to load
+      }
+    }
+  }, [Messages]);
+
   return (
     <>
       <div
@@ -64,7 +98,10 @@ const Pagination = () => {
         }}
         className="m-auto br-15px card text-center w-400px h-min-400px h-50vh absolute col gap-5px"
       >
-        <div className="col-reverse gap-3px h-100p overflow-y-scroll visible-scrollbar">
+        <div
+          className="col-reverse gap-3px h-100p overflow-y-scroll visible-scrollbar"
+          onScroll={handleScroll} // Add the scroll event handler here
+        >
           {Messages.map((msg) => (
             <MessageRow message={msg} key={msg.id} />
           ))}
