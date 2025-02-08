@@ -21,7 +21,7 @@ function useCollectionObserver<T>({
   Condition,
   Dependencies = [],
   Run = true,
-  ReplaceOld = true,
+  ReplaceOld = false,
 }: Props<T>): (T & { docId: string })[] {
   const [firestoreCollection, setFirestoreCollection] = useState<
     Array<T & { docId: string }>
@@ -51,13 +51,13 @@ function useCollectionObserver<T>({
       );
     });
 
-    // Properly list dependencies
+    // Cleanup on unmount
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
-  }, [Collection, Condition, Dependencies, Run, ReplaceOld]); // Add the necessary dependencies
+  }, [Collection, Condition, Dependencies, Run, ReplaceOld]);
 
   return firestoreCollection;
 }

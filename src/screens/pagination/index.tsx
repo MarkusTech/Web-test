@@ -27,9 +27,10 @@ const Pagination = () => {
     Collection: "messages",
     Condition: [
       orderBy("createdAt", "desc"),
-      ...(lastVisible ? [startAfter(lastVisible.createdAt)] : []), // Only add startAfter if lastVisible is not null
-      limit(20), // Limit to 20 messages per query
+      ...(lastVisible ? [startAfter(lastVisible.createdAt)] : []),
+      limit(20),
     ],
+    ReplaceOld: false, // This will append new messages instead of replacing them
   });
 
   const sendMessage = useCallback(async () => {
@@ -66,15 +67,13 @@ const Pagination = () => {
 
   const handleScroll = (e: React.SyntheticEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop;
-    const scrollHeight = e.currentTarget.scrollHeight;
-    const clientHeight = e.currentTarget.clientHeight;
 
     // If the user scrolls to the top, start loading the next set of messages
     if (scrollTop === 0 && !loading && hasMore) {
       setLoading(true);
       if (Messages.length > 0) {
         const nextLastVisible = Messages[Messages.length - 1];
-        setLastVisible(nextLastVisible);
+        setLastVisible(nextLastVisible); // Update lastVisible to fetch next batch
       }
     }
   };
