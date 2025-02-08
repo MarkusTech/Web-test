@@ -30,7 +30,7 @@ const Pagination = () => {
       ...(lastVisible ? [startAfter(lastVisible.createdAt)] : []),
       limit(20),
     ],
-    ReplaceOld: false, // This will append new messages instead of replacing them
+    ReplaceOld: false,
   });
 
   const sendMessage = useCallback(async () => {
@@ -68,12 +68,12 @@ const Pagination = () => {
   const handleScroll = (e: React.SyntheticEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop;
 
-    // If the user scrolls to the top, start loading the next set of messages
     if (scrollTop === 0 && !loading && hasMore) {
       setLoading(true);
+
       if (Messages.length > 0) {
         const nextLastVisible = Messages[Messages.length - 1];
-        setLastVisible(nextLastVisible); // Update lastVisible to fetch next batch
+        setLastVisible(nextLastVisible);
       }
     }
   };
@@ -99,7 +99,7 @@ const Pagination = () => {
       >
         <div
           className="col-reverse gap-3px h-100p overflow-y-scroll visible-scrollbar"
-          onScroll={handleScroll} // Add the scroll event handler here
+          onScroll={handleScroll}
         >
           {Messages.map((msg) => (
             <MessageRow message={msg} key={msg.id} />
