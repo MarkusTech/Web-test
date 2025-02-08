@@ -8,8 +8,8 @@ import { googleSignIn } from "@/services/firebase/auth";
 import { createDocument, createId } from "@/services/firebase/firestore";
 import { MessageType } from "@/types";
 import { sanitizeString } from "@/utils/functions";
-import { TSDate, UTCDate } from "@/utils/variables";
-import React, { useCallback, useEffect, useState } from "react";
+import { TSDate } from "@/utils/variables";
+import { useCallback, useEffect, useState } from "react";
 import MessageRow from "./components/MessageRow";
 import { orderBy } from "firebase/firestore";
 
