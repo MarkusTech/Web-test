@@ -17,9 +17,7 @@ const Pagination = () => {
   const { Auth, logout } = useAuth();
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState(false);
-  const [lastVisible, setLastVisible] = useState<
-    (MessageType & { docId: string }) | null
-  >(null);
+  const [lastVisible, setLastVisible] = useState<MessageType | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
@@ -68,13 +66,16 @@ const Pagination = () => {
   const handleScroll = (e: React.SyntheticEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop;
 
-    if (scrollTop === 0 && !loading && hasMore) {
+    //  This help me fix with the error on scrolling and not rendering data. and i put setTimeout for 1 sec
+    if (scrollTop <= 50 && !loading && hasMore) {
       setLoading(true);
-
-      if (Messages.length > 0) {
-        const nextLastVisible = Messages[Messages.length - 1];
-        setLastVisible(nextLastVisible);
-      }
+      setTimeout(() => {
+        if (Messages.length > 0) {
+          const nextLastVisible = Messages[Messages.length - 1];
+          setLastVisible(nextLastVisible);
+          setLoading(false);
+        }
+      }, 1000);
     }
   };
 
@@ -82,7 +83,7 @@ const Pagination = () => {
     if (Messages.length > 0) {
       setLoading(false);
       if (Messages.length < 20) {
-        setHasMore(false); // No more messages to load
+        setHasMore(false);
       }
     }
   }, [Messages]);
