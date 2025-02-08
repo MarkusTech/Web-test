@@ -1,6 +1,5 @@
 import Colors from "@/common/colors";
 import Images from "@/common/images";
-import Modal from "@/components/Modal";
 import TextInput from "@/components/TextInput";
 import useCollectionObserver from "@/hooks/useCollectionObserver";
 import useKeyListener from "@/hooks/useKeyListener";
@@ -12,8 +11,6 @@ import { sanitizeString } from "@/utils/functions";
 import { TSDate, UTCDate } from "@/utils/variables";
 import React, { useCallback, useEffect, useState } from "react";
 import MessageRow from "./components/MessageRow";
-import { signOut } from "firebase/auth";
-import { auth } from "@/services/firebase/config";
 import { orderBy } from "firebase/firestore";
 
 const Pagination = () => {
