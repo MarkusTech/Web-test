@@ -3,7 +3,7 @@ import Images from "@/common/images";
 import useGetTimePassed from "@/hooks/useGetTimePassed";
 import { useAuth } from "@/services/context/AuthContext";
 import { MessageType } from "@/types";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 type Props = {
   message: MessageType;
 };
